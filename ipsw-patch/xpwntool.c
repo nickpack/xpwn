@@ -8,7 +8,7 @@
 int main(int argc, char* argv[]) {
 	char* inData;
 	size_t inDataSize;
-	init_libxpwn();
+	init_libxpwn(&argc, argv);
 
 	if(argc < 3) {
 		printf("usage: %s <infile> <outfile> [-x24k|-xn8824k] [-t <template> [-c <certificate>]] [-k <key>] [-iv <key>] [-decrypt]\n", argv[0]);
@@ -71,6 +71,10 @@ int main(int argc, char* argv[]) {
 			xn8824k = TRUE;
 		}
 
+		if(strcmp(argv[argNo], "-xn8824k") == 0) {
+			xn8824k = TRUE;
+		}
+
 		argNo++;
 	}
 
@@ -128,6 +132,12 @@ int main(int argc, char* argv[]) {
 			exploit24kpwn(newFile);
 		}
 	}	
+	if(xn8824k) {
+		if(newFile->type == AbstractFileTypeImg3) {
+			exploitN8824kpwn(newFile);
+		}
+	}
+
 	if(xn8824k) {
 		if(newFile->type == AbstractFileTypeImg3) {
 			exploitN8824kpwn(newFile);

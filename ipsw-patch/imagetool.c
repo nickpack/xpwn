@@ -37,7 +37,7 @@ int image_extract(const char* source, const char* destination, unsigned int* iv,
 
 
 int main(int argc, char* argv[]) {
-	init_libxpwn();
+	init_libxpwn(&argc, argv);
 	
 	if(argc < 4) {
 		print_usage();
