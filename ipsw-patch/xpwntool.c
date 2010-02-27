@@ -67,10 +67,7 @@ int main(int argc, char* argv[]) {
 		if(strcmp(argv[argNo], "-x24k") == 0) {
 			x24k = TRUE;
 		}
-		if(strcmp(argv[argNo], "-xn8824k") == 0) {
-			xn8824k = TRUE;
-		}
-
+		
 		if(strcmp(argv[argNo], "-xn8824k") == 0) {
 			xn8824k = TRUE;
 		}
@@ -132,11 +129,6 @@ int main(int argc, char* argv[]) {
 			exploit24kpwn(newFile);
 		}
 	}	
-	if(xn8824k) {
-		if(newFile->type == AbstractFileTypeImg3) {
-			exploitN8824kpwn(newFile);
-		}
-	}
 
 	if(xn8824k) {
 		if(newFile->type == AbstractFileTypeImg3) {
