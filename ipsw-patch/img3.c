@@ -537,9 +537,12 @@ AbstractFile* createAbstractFileFromImg3(AbstractFile* file) {
 	info->cert = NULL;
 	info->kbag = NULL;
 	info->type = NULL;
+<<<<<<< HEAD:ipsw-patch/img3.c
 	info->shsh = NULL;
 	info->ecid = NULL;
 	info->encrypted = FALSE;
+=======
+>>>>>>> 510963469f82480453a13bbb73c0a95da0f0b378:ipsw-patch/img3.c
 
 	current = (Img3Element*) info->root->data;
 	while(current != NULL) {
