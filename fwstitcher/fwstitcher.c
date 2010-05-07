@@ -264,64 +264,44 @@ void createTssFirmware(TssResponse* response, const char* input, char* output) {
   }
 
   // Extract entire IPSW
-  OutputState* in_state = loadZip(input);
-  OutputState* out_state = malloc(sizeof(OutputState));
-  while (in_state != NULL) {
-    // Search through all entries in our response
-    Dictionary* entry = (Dictionary*) root->values;
-    while (entry != NULL) {
-
-      // Make sure this entry is a dictionary
-      if (entry->dValue.type != DictionaryType) {
-        entry = (Dictionary*) entry->dValue.next;
-        continue;
-      }
-
-      // And that we have the proper values
-      StringValue* path = (StringValue*) getValueByKey(entry, "Path");
-      StringValue* blob = (StringValue*) getValueByKey(entry, "Blob");
-      if (path == NULL || blob == NULL) {
-        fprintf(stderr, "Unable to find the proper values in this entry\n");
-        entry = (Dictionary*) entry->dValue.next;
-        continue;
-      }
-
-      // Is this entry match the current one in state
-      printf("Replacing SHSH on %s\n", entry->dValue.key);
-
-      char* data = NULL;
-      size_t data_size = 0;
-      delchar(blob->value, '\t');
-      delchar(blob->value, '\n');
-      base64_decode_alloc(blob->value, strlen(blob->value), &data, &data_size);
-
-      AbstractFile* signature = createAbstractFileFromMemory((void**) &data, data_size);
-      AbstractFile* file = getFileFromOutputState(&in_state, path->value);
-      replaceImg3Signature(file, signature);
-      char* in_data = malloc(file->getLength(file));
-      file->read(file, in_data, file->getLength(file));
-      size_t in_len = file->getLength(file);
-      addToOutput(&out_state, entry->dValue.key, in_data, in_len);
-      signature->close(signature);
-      file->close(file);
-
-      char* tmp = createTempFile();
-      AbstractFile* store = createAbstractFileFromFile(fopen(tmp, "wb"));
-      store->write(store, in_data, file->getLength(file));
-      store->close(store);
-
-      //addToOutput2(&out_state, path->value, file->data, file->getLength(file), tmp);
-      //removeFileFromOutputState(&in_state, path->value);
-      free(data);
-      free(tmp);
+  OutputState* in_state = NULL;
+  Dictionary* entry = (Dictionary*) root->values;
+  while (entry != NULL) {
+    // Make sure this entry is a dictionary
+    if (entry->dValue.type != DictionaryType) {
       entry = (Dictionary*) entry->dValue.next;
+      continue;
     }
 
-    in_state = in_state->next;
-  }
+    // And that we have the proper values
+    StringValue* path = (StringValue*) getValueByKey(entry, "Path");
+    StringValue* blob = (StringValue*) getValueByKey(entry, "Blob");
+    if (path == NULL || blob == NULL) {
+      fprintf(stderr, "Unable to find the proper values in this entry\n");
+      entry = (Dictionary*) entry->dValue.next;
+      continue;
+    }
 
+    // Is this entry match the current one in state
+    printf("Replacing SHSH on %s\n", entry->dValue.key);
+
+    char* data = NULL;
+    size_t data_size = 0;
+    delchar(blob->value, '\t');
+    delchar(blob->value, '\n');
+    base64_decode_alloc(blob->value, strlen(blob->value), &data, &data_size);
+    AbstractFile* signature = createAbstractFileFromMemory((void**) &data, data_size);
+    
+    loadZipFile(input, &in_state, path->value);
+    AbstractFile* file = openAbstractFile(getFileFromOutputState(&in_state, path->value));
+    replaceImg3Signature(file, signature);
+	file->close(file);
+    entry = (Dictionary*) entry->dValue.next;
+  }
+  
+  writeOutput(&in_state, output);
+  releaseOutput(&in_state);
   releaseDictionary(root);
-  writeOutput(&out_state, output);
 }
 
 void replaceImg3Signature(AbstractFile* file, AbstractFile* signature) {
